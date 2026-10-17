@@ -12,6 +12,75 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Switch source code to 1.16.5
+        run: |
+          python3 - << 'EOF'
+          import os, re
+
+          def flip_to_1_16_5(path):
+              with open(path, 'r', encoding='utf-8') as f:
+                  text = f.read()
+
+              # 1. Flip if-else blocks: comment out modern 'if', uncomment 1.16.5 'else'
+              def repl_if_else(m):
+                  pre_if = m.group(1)
+                  body1 = m.group(2)
+                  mid_else = m.group(3)
+                  body2 = m.group(4)
+                  post_else = m.group(5)
+                  
+                  # Strip /* and */ from the 1.16.5 else block
+                  uncommented_b2 = re.sub(r'^\s*/\*', '', body2)
+                  uncommented_b2 = re.sub(r'\*/\s*$', '', uncommented_b2)
+                  
+                  # Wrap modern if block in /* ... */
+                  commented_b1 = '/*' + body1.lstrip()
+                  if commented_b1.endswith('\n'):
+                      commented_b1 = commented_b1[:-1] + '*/\n'
+                  else:
+                      commented_b1 += '*/'
+                      
+                  return pre_if + commented_b1 + mid_else + uncommented_b2 + post_else
+
+              pattern_if_else = re.compile(
+                  r'(//\?\s*if[^\n]*\{\r?\n)'
+                  r'([\s\S]*?)'
+                  r'(\r?\n[ \t]*//\?\}\s*else\s*\{\r?\n)'
+                  r'([\s\S]*?)'
+                  r'(\r?\n[ \t]*//\?\})'
+              )
+              text = pattern_if_else.sub(repl_if_else, text)
+
+              # 2. Comment out any modern single-if blocks without else
+              pattern_single = re.compile(
+                  r'(//\?\s*if[^\n]*\{\r?\n)'
+                  r'([\s\S]*?)'
+                  r'(\r?\n[ \t]*//\?\}(?!\s*else))'
+              )
+              def repl_single(m):
+                  body = m.group(2)
+                  if not body.strip().startswith('/*'):
+                      c_body = '/*' + body.lstrip()
+                      if c_body.endswith('\n'):
+                          c_body = c_body[:-1] + '*/\n'
+                      else:
+                          c_body += '*/'
+                      return m.group(1) + c_body + m.group(3)
+                  return m.group(0)
+
+              text = pattern_single.sub(repl_single, text)
+
+              with open(path, 'w', encoding='utf-8') as f:
+                  f.write(text)
+
+          for root, _, files in os.walk('src'):
+              for file in files:
+                  if file.endswith('.java'):
+                      flip_to_1_16_5(os.path.join(root, file))
+
+          print("All source files successfully converted to 1.16.5 mode!")
+          EOF
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
