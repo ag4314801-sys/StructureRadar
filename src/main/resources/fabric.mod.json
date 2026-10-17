@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "structureradar",
+  "version": "${version}",
+  "name": "StructureRadar World Map",
+  "description": "Xaero-style 2D World Map & Render-Distance Structure Scanner for Multiplayer Servers (1.16.5 - 26.2). Automatically locates Trial Chambers, Ancient Cities, Strongholds, Bastions, Fortresses, End Cities, Monuments, and more without needing the world seed.",
+  "authors": [
+    "StructureRadar Team"
+  ],
+  "contact": {
+    "sources": "https://github.com/example/structureradar"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.structureradar.StructureRadarClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "*",
+    "fabric-api": "*"
+  }
+}

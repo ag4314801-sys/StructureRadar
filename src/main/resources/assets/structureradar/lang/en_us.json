@@ -1,0 +1,6 @@
+{
+  "category.structureradar.map": "StructureRadar World Map",
+  "key.structureradar.open_map": "Open 2D Structure & World Map",
+  "key.structureradar.toggle_hud": "Toggle Nearby Structure HUD",
+  "key.structureradar.quick_mark": "Quick-Mark Waypoint at Player"
+}
